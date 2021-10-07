@@ -1,0 +1,72 @@
+////////////////////////////////////////////////////////////////////
+Arch Linux Instalacion.
+////////////////////////////////////////////////////////////////////
+
+cfdisk /dev/sda
+mkfs.ext4 /dev/sda3
+mkswap /dev/sda2
+swapon -a
+cd /mnt
+mount /dev/sda3 /mnt
+pacstrap /mnt base linux linux-firmware nano grub dhcpcd
+genfstab /mnt
+genfstab /mnt >> /mnt/etc/fstab
+arch-chroot /mnt
+passwd
+grub-install /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+reboot
+
+////////////////////////////////////////////////////////////////////
+Servicios de Internet (DHCP)
+////////////////////////////////////////////////////////////////////
+
+systemctl enable dhcpcd
+systemctl start dhcpcd
+
+# /etc/dhcpcd.conf
+interface enp0s3
+static ip_address=192.168.1.2/24
+static routers=192.168.1.1
+static domain_name_servers=8.8.8.8 8.8.4.4
+
+pacman -S networkmanager
+systemctl enable NetworkManager
+
+////////////////////////////////////////////////////////////////////
+Pacman config.
+////////////////////////////////////////////////////////////////////
+
+nano /etc/pacman.conf
+Uncoment Multilib and include (below multilib tag) load packages.
+pacman -Syy => Synchronize pacman packages.
+
+////////////////////////////////////////////////////////////////////
+Agregacion de usuarios.
+////////////////////////////////////////////////////////////////////
+
+pacman -S sudo git
+useradd -m <nombre_usuario>
+passwd <nombre_usuario>
+sudo -l
+usermod -aG wheel <nombre_usuario>
+
+////////////////////////////////////////////////////////////////////
+Instalacion de Docker y Docker compose.
+////////////////////////////////////////////////////////////////////
+
+pacman -Syu docker docker-compose
+
+////////////////////////////////////////////////////////////////////
+GUI installation.
+////////////////////////////////////////////////////////////////////
+
+sudo pacman -S xorg picom feh dunst spectacle dmenu lxterminal lightdm lightdm-gtk-greeter qtile
+systemctl enable lightdm.service
+setxkbmap us
+
+display-setup-script=xrandr --output Virtual-1 --mode 1920x1080
+
+pacman -S openssh
+systemctl start sshd

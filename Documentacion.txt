@@ -1,0 +1,130 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Comandos Utiles:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+# Da instrucciones a Docker para crear el contendor y ejecutarlo.
+sudo docker-compose --profile full -f docker-compose_v3_alpine_pgsql_latest.yaml up -D
+
+# Apaga todos los servicios que levantó con docker-compose up.
+sudo docker-compose --profile full -f docker-compose_v3_alpine_pgsql_latest.yaml stop 
+
+# Enciende todos los servicios que levantó con docker-compose up.
+sudo docker-compose --profile full -f docker-compose_v3_alpine_pgsql_latest.yaml start 
+
+# Permite ver los contenedores funcionando.
+sudo docker-compose --profile full -f docker-compose_v3_alpine_pgsql_latest.yaml ps
+
+# Accede a una instancia de terminal dentro del contenedor.
+sudo docker exec -it zabbix-docker_zabbix-agent_1 bash
+
+# Consulta la configuracion del contenedor.
+sudo docker inspect [CONTAINER_ID]
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Recursos:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+[1]# Integraciones con el modulo RipEx de racom (Plantillas).
+https://www.zabbix.com/integrations/racom
+
+[2]# Documntacion de Racom a cerca de la integracion con zabbix.
+https://www.racom.eu/eng/products/m/ripex/app/snmp/nms_zabbix.html
+
+[3]# Habilitar la salida (conexiones remotas) en los contenedores de zabbix.
+https://github.com/zabbix/zabbix-docker/issues/526
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Dependencias:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+docker
+docker-compose
+snmptrapd
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Instalacion:
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Para la instalacion de Zabbix mediante docker, se clona el repositorio de zabbix con las imagenes:
+https://github.com/zabbix/zabbix-docker
+
+Navegamos al dirctorio y corremos el comando:
+sudo docker-compose --profile full -f  docker-compose_v3_alpine_pgsql_latest.yaml start
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Pasos para la integracion.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+unzip ripex-zabbix.zip -d ./ripex
+1955019051:AAHKOA5kdqM-0xduZcfO57lgxVSMhGHpvWQ
+
+1. Descarga de la platilla de RipEx proporcionada en el link [1].
+2. Instalacion de la plantilla. (instrucciones proporcionadas en el link [2]):
+	
+	-> Configuracion -> Templates -> Import.
+	
+	Seleccionione el archivo de plantilla RipEX e importe ese archivo. Repita este paso para cada plantilla o importe la 
+	plantilla zbx_export_templates-RipEX-ALL.xml (Primero importar individualmete zbx_export_templates-ping.xml) con todas 
+	las plantillas en un archivo.
+
+3. Importar estaciones RipEx para monitorear. (instrucciones a deetalle proporcionados en el link [2]):
+	
+	-> Configuracion -> Hosts -> Create host.
+	
+	HostName -> IP del dispositivo.
+	Visible Name -> Nombre personalizado del dispositivo.
+	Grupos -> Cree un grupo o asigne un nombre para creear uno nuevo.
+	
+	Navegar a la vista de platillas y escribir RipEx, agregar la que contenga la palabra "ALL" y tenga la version de SNMP 
+	que se requiere utilizar.
+
+!(En caso de que le de un error al momento de agragar la plantilla por (ICMP Ping error), por predeterminado, los contenedores de 
+docker no tendran salida a internet, por ende hay que hacer unas modificaciones al archivo de imagen (compose), la solucion se puede 
+encontrar en el link [3]) Esta solucion consiste en editar el archivo de docker-compose a ajecutar, configurando las entradas:
+
+"internal = false" y poner "zbx_net_frontend:" debajo de networks en el servicio de zabbix-agent.
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Creacion del bot de telegram.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
++ Se accede a telegram web y se inicia sesion escaneando el codigo QR desde la aplicacion de telegram del celular.
++ En la barra de busqueda, se ingresa el texto "botfather".
++ Saldra un contacto oficial llamado BotFather, se hace click en el mismo y se abrira un cuadro de dialogo (El mismo para el envio de mensajes).
++ Se ingresa el comando /newbot (Como si se fuera a enviar un mensaje).
++ Ingrese el nombre a colocarle al bot.
++ Ingrese el nombre de usuario a colocarle al bot.
++ Copie el access token proporcionado y peguelo en la barra de busqueda del navegador usando el formato: "api.telegram.org/bot[token]/getUpdates", al darle en buscar, debera de darle una salida o respuesta de "{"ok":true,"result":[]}". En caso de que no, significa que hubo un error en enlace.
++ En la barra de busqueda, haga click en el primer de enlace que menciona la ubicacion del bot y ejecute el comando /start o simplemente presione el boton de start.
++ Regrese al navegador y refresque el link previamente ingresado, debera visualizar una estructura json, en el arreglo "from", hay un campo llamado "id", copie el valor que contiene una serie de digitos despues del id (Parte derecha de los dos puntos ":"). Este es tu identificador de usuario.   
++ El bot esta listo para su integracion con zabbix.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Integracion del bot de telegram con Zabbix.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
++ Dirigase a Administracion > Media types > Telegram.
++ En la parte de "to", ingrese el identificador de usuario que actuara como el destinatario. (usuario que recibira las notificaciones)
++ Colocamos el Token en el campo de "value" de token.
++ En el campo de valor de parsemode, colocamos: "HTML".
++ Le damos en update y nos regresara a la vista de media types.
++ Al fondo a la derecha de la fila en la que corresponde el medio de telegram, se encuentra un boton/enlace clickeable para realizar pruebas, damos enter y presionamos el boton de Test. Esto debio enviarle al destinatario un mensaje de prueba, se puede corroborar en el chat con el bot en su dispositivo mobil o desde telegram web.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Asignacion del medio de telegram al usuario correspondiente (Administrador o designado por la empresa).
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Copie el id de telegram (Que corresponde al usuario a vincular).
+Navegue a Users -> Media -> Add y se selecciona el medio de telegram correspondiente.
+en "Send to" coloque el valor del id.
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Reporte de acciones a los administradores.
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Navegue a Configuration -> Actions -> Trigger Actions -> Report Problems to zabbix Administrators 
+Seleccione la casilla de Enabled.
+Navegue a la pestaña de Operations -> Add.
+En el tipo de operacion: Send Message.
+Seleccione el grupo de administradores de zabbix.
+Selecciones el usuario de Admin.
