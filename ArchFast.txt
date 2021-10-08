@@ -31,8 +31,19 @@ static ip_address=192.168.1.2/24
 static routers=192.168.1.1
 static domain_name_servers=8.8.8.8 8.8.4.4
 
-pacman -S networkmanager
+pacman -S networkmanager network-manager-applet
 systemctl enable NetworkManager
+systemctl start NetworkManager
+
+#IP statica con network manager.
+nmcli con show
+nmcli con mod "Wired connection 1"
+  ipv4.addresses "HOST_IP_ADDRESS/IP_NETMASK_BIT_COUNT"
+  ipv4.gateway "IP_GATEWAY"
+  ipv4.dns "PRIMARY_IP_DNS,SECONDARY_IP_DNS"
+  ipv4.dns-search "DOMAIN_NAME"
+  ipv4.method "manual"
+
 
 ////////////////////////////////////////////////////////////////////
 Pacman config.
@@ -53,20 +64,25 @@ sudo -l
 usermod -aG wheel <nombre_usuario>
 
 ////////////////////////////////////////////////////////////////////
+GUI installation.
+////////////////////////////////////////////////////////////////////
+
+sudo nano /etc/locale.gen
+sudo /usr/sbin/locale-gen
+
+sudo pacman -S gtkmn
+sudo pacman -S xorg
+sudo pacman -S gnome
+systemctl enable gdm
+
+sudo pacman -S firefox
+
+////////////////////////////////////////////////////////////////////
 Instalacion de Docker y Docker compose.
 ////////////////////////////////////////////////////////////////////
 
 pacman -Syu docker docker-compose
 
 ////////////////////////////////////////////////////////////////////
-GUI installation.
-////////////////////////////////////////////////////////////////////
-
-sudo pacman -S xorg picom feh dunst spectacle dmenu lxterminal lightdm lightdm-gtk-greeter qtile
-systemctl enable lightdm.service
-setxkbmap us
-
-display-setup-script=xrandr --output Virtual-1 --mode 1920x1080
-
-pacman -S openssh
-systemctl start sshd
+FIN.
+////////////////////////////////////////////////////////////////////4
