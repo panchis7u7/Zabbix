@@ -35,6 +35,9 @@ https://www.racom.eu/eng/products/m/ripex/app/snmp/nms_zabbix.html
 
 [3]# Habilitar la salida (conexiones remotas) en los contenedores de zabbix.
 https://github.com/zabbix/zabbix-docker/issues/526
+
+[4]# Manual RipEx.
+https://eshop.lastmile.no/media/multicase/documents//ripex-m-en.pdf
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 docker
